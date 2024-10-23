@@ -15,6 +15,7 @@ TRIG = 11 #ultrasonic input GPIO 17
 ECHO = 12 #ultrasonic output GPIO 18
 R = 13 # LED red pin GPIO 27
 G = 15 # LED green pin GPIO 22
+VIBRATION_PIN = 18 # GPIO 24
 FULL_DISTANCE = 5
 HALF_DISTANCE = 10
 
@@ -43,6 +44,17 @@ def setup() -> None:
     # Initial duty Cycle = 0 (leds off)
     p_R.start(0)
     p_G.start(0)
+
+    # Set Vibration motor pin
+    GPIO.setup(VIBRATION_PIN, GPIO.OUT)
+    GPIO.output(VIBRATION_PIN, GPIO.HIGH)
+
+def vibrate_on():
+    GPIO.output(VIBRATION_PIN, GPIO.LOW)
+
+def vibrate_off():
+    GPIO.output(VIBRATION_PIN, GPIO.HIGH)
+
 
 def map(x, in_min, in_max, out_min, out_max):
     """
@@ -96,8 +108,12 @@ def loop():
         print()
         if dis <= FULL_DISTANCE:
             setColor(colors_dict["Red"])
+            vibrate_on()
         elif dis <= HALF_DISTANCE:
             setColor(colors_dict["Yellow"])
+            vibrate_off()
+        else:
+            vibrate_off()
         time.sleep(0.3)
 
 def destroy():
@@ -109,6 +125,9 @@ def destroy():
     p_G.stop()
     GPIO.output(R, GPIO.LOW)
     GPIO.output(G, GPIO.LOW)
+
+    # turn off vibration motor
+    GPIO.output(VIBRATION_PIN, GPIO.HIGH)
 
     GPIO.cleanup()
 
