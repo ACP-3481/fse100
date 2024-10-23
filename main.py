@@ -24,7 +24,6 @@ def setup() -> None:
     """
     global p_R
     global p_G
-    global p_B
     GPIO.setmode(GPIO.BOARD)
     # ultrasonic setup
     GPIO.setup(TRIG, GPIO.OUT) 
@@ -56,8 +55,8 @@ def setColor(col: int) -> None:
     Sets the led to a color based on a 24-bit int
     """
     # get individual rgb values from 24-bit color
-    R_val = (col >> 16) & 0xFF
-    G_val = (col >> 8) & 0xFF
+    R_val = col >> 8
+    G_val = col & 0x0FF
 
     # map the rgb values (0-255) into rpi duty cycles (0-100%)
     R_val = map(R_val, 0, 255, 0, 100)
