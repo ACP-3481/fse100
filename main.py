@@ -15,7 +15,6 @@ TRIG = 11 #ultrasonic input
 ECHO = 12 #ultrasonic output
 R = 13 # LED red pin
 G = 15 # LED green pin
-B = 16 # LED blue pin
 FULL_DISTANCE = 5
 HALF_DISTANCE = 10
 
@@ -34,21 +33,17 @@ def setup() -> None:
     # dual color LED setup
     GPIO.setup(R, GPIO.OUT)
     GPIO.setup(G, GPIO.OUT)
-    GPIO.setup(B, GPIO.OUT)
 
     # set LED pins to LOW / off
     GPIO.output(R, GPIO.LOW)
     GPIO.output(G, GPIO.LOW)
-    GPIO.output(B, GPIO.LOW)
 
     p_R = GPIO.PWM(R, 2000) # set frequency to 2KHz
     p_G = GPIO.PWM(G, 2000)
-    p_B = GPIO.PWM(B, 2000)
 
     # Initial duty Cycle = 0 (leds off)
     p_R.start(0)
     p_G.start(0)
-    p_B.start(0)
 
 def map(x, in_min, in_max, out_min, out_max):
     """
@@ -63,16 +58,13 @@ def setColor(col: int) -> None:
     # get individual rgb values from 24-bit color
     R_val = (col >> 16) & 0xFF
     G_val = (col >> 8) & 0xFF
-    B_val = col & 0xFF
 
     # map the rgb values (0-255) into rpi duty cycles (0-100%)
     R_val = map(R_val, 0, 255, 0, 100)
     G_val = map(G_val, 0, 255, 0, 100)
-    B_val = map(B_val, 0, 255, 0, 100)
 
     p_R.ChangeDutyCycle(R_val)
     p_G.ChangeDutyCycle(G_val)
-    p_B.ChangeDutyCycle(B_val)
 
 def distance() -> float:
     """
@@ -116,10 +108,8 @@ def destroy():
     # turn off leds
     p_R.stop()
     p_G.stop()
-    p_B.stop()
     GPIO.output(R, GPIO.LOW)
     GPIO.output(G, GPIO.LOW)
-    GPIO.output(B, GPIO.LOW)
 
     GPIO.cleanup()
 
