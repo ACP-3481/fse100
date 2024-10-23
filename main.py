@@ -14,7 +14,7 @@ colors_dict = {
 TRIG = 11 #ultrasonic input
 ECHO = 12 #ultrasonic output
 R = 13 # LED red pin
-G = 15 # LED green pin
+G = 16 # LED green pin
 FULL_DISTANCE = 5
 HALF_DISTANCE = 10
 
