@@ -47,13 +47,13 @@ def setup() -> None:
 
     # Set Vibration motor pin
     GPIO.setup(VIBRATION_PIN, GPIO.OUT)
-    GPIO.output(VIBRATION_PIN, GPIO.HIGH)
-
-def vibrate_on():
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
-def vibrate_off():
+def vibrate_on():
     GPIO.output(VIBRATION_PIN, GPIO.HIGH)
+
+def vibrate_off():
+    GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
 
 def map(x, in_min, in_max, out_min, out_max):
@@ -127,7 +127,7 @@ def destroy():
     GPIO.output(G, GPIO.LOW)
 
     # turn off vibration motor
-    GPIO.output(VIBRATION_PIN, GPIO.HIGH)
+    GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
     GPIO.cleanup()
 
