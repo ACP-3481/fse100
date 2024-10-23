@@ -11,10 +11,10 @@ colors_dict = {
     "Magenta": 0xFF00FF,
     "Cyan": 0x00FFFF
 }
-TRIG = 11 #ultrasonic input
-ECHO = 12 #ultrasonic output
-R = 13 # LED red pin
-G = 16 # LED green pin
+TRIG = 11 #ultrasonic input GPIO 17
+ECHO = 12 #ultrasonic output GPIO 18
+R = 13 # LED red pin GPIO 27
+G = 15 # LED green pin GPIO 22
 FULL_DISTANCE = 5
 HALF_DISTANCE = 10
 
