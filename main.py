@@ -56,7 +56,7 @@ def setColor(col: int) -> None:
     """
     # get individual rgb values from 24-bit color
     R_val = col >> 8
-    G_val = col & 0x0FF
+    G_val = (col >> 8) & 0x00FF
 
     # map the rgb values (0-255) into rpi duty cycles (0-100%)
     R_val = map(R_val, 0, 255, 0, 100)
