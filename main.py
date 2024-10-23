@@ -55,7 +55,7 @@ def setColor(col: int) -> None:
     Sets the led to a color based on a 24-bit int
     """
     # get individual rgb values from 24-bit color
-    R_val = col >> 8
+    R_val = col >> 16
     G_val = (col >> 8) & 0x00FF
 
     # map the rgb values (0-255) into rpi duty cycles (0-100%)
