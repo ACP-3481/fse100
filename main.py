@@ -9,7 +9,8 @@ colors_dict = {
     "Blue": 0x0000FF,
     "Yellow": 0xFFFF00,
     "Magenta": 0xFF00FF,
-    "Cyan": 0x00FFFF
+    "Cyan": 0x00FFFF,
+    "Off": 0x000000
 }
 TRIG = 11 #ultrasonic input GPIO 17
 ECHO = 12 #ultrasonic output GPIO 18
@@ -113,6 +114,7 @@ def loop():
             setColor(colors_dict["Yellow"])
             vibrate_off()
         else:
+            setColor(colors_dict["Off"])
             vibrate_off()
         time.sleep(0.3)
 
