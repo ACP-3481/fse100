@@ -19,6 +19,8 @@ G = 15 # LED green pin GPIO 22
 VIBRATION_PIN = 18 # GPIO 24
 FULL_DISTANCE = 5
 HALF_DISTANCE = 10
+TRIG2 = 29 # ultrasonic (proximity) input GPIO 5
+ECHO2 = 31 # ultrasonic (proximity) output GPIO 6
 
 def setup() -> None:
     """
@@ -28,8 +30,12 @@ def setup() -> None:
     global p_G
     GPIO.setmode(GPIO.BOARD)
     # ultrasonic setup
-    GPIO.setup(TRIG, GPIO.OUT) 
+    GPIO.setup(TRIG, GPIO.OUT)
     GPIO.setup(ECHO, GPIO.IN) # read from ultrasonic
+
+    # proximity setup
+    GPIO.setup(TRIG2, GPIO.OUT)
+    GPIO.setup(ECHO2, GPIO.IN)
 
     # dual color LED setup
     GPIO.setup(R, GPIO.OUT)
@@ -99,24 +105,46 @@ def distance() -> float:
     during = time2 - time1
     return during * 340 / 2 * 100 # Speed of sound = 340 m/s, convert to cm
 
+def proximity() -> float:
+    """
+    Gets the distance from the proximity sensor in cm
+    """
+    GPIO.output(TRIG2, 0)
+    time.sleep(0.000002) # wait 2 microseconds to ensure the pin settles
+
+    GPIO.output(TRIG2, 1)
+    time.sleep(0.00001) # wait 10 microseconds to trigger the ultrasonic pulse
+    GPIO.output(TRIG, 0)
+
+    while GPIO.input(ECHO) == 0: # wait for ECHO to go high
+        pass
+    time1 = time.time()
+    while GPIO.input(ECHO) == 1: # wait for ECHO to go low
+        pass
+    time2 = time.time()
+
+    during = time2 - time1
+    return during * 340 / 2 * 100 # Speed of sound = 340 m/s, convert to cm
+
 def loop():
     """
     Main program loop.
     """
     while True:
-        dis = distance()
-        print(dis, 'cm')
-        print()
-        if dis <= FULL_DISTANCE:
-            setColor(colors_dict["Red"])
-            vibrate_on()
-        elif dis <= HALF_DISTANCE:
-            setColor(colors_dict["Yellow"])
-            vibrate_off()
-        else:
-            setColor(colors_dict["Off"])
-            vibrate_off()
-        time.sleep(0.3)
+        if proximity() <= 5: # only run when cup is within 5 cm
+            dis = distance()
+            print(dis, 'cm')
+            print()
+            if dis <= FULL_DISTANCE:
+                setColor(colors_dict["Red"])
+                vibrate_on()
+            elif dis <= HALF_DISTANCE:
+                setColor(colors_dict["Yellow"])
+                vibrate_off()
+            else:
+                setColor(colors_dict["Off"])
+                vibrate_off()
+            time.sleep(0.3)
 
 def destroy():
     """
