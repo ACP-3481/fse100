@@ -103,19 +103,29 @@ def loop():
     """
     Main program loop.
     """
+    currentlyFull = False;
+    currentlyHalfFull = False;
     while True:
         dis = distance()
         print(dis, 'cm')
         print()
-        if dis <= FULL_DISTANCE:
+        if dis <= FULL_DISTANCE and not currentlyFull:
             setColor(colors_dict["Red"])
             vibrate_on()
-        elif dis <= HALF_DISTANCE:
+            time.sleep(1)
+            setColor(colors_dict["Off"])
+            currentlyFull = True;
+        elif dis <= HALF_DISTANCE and not currentlyHalfFull:
             setColor(colors_dict["Yellow"])
             vibrate_off()
+            time.sleep(1)
+            setColor(colors_dict["Off"])
+            currentlyHalfFull = True;
         else:
             setColor(colors_dict["Off"])
             vibrate_off()
+            currentlyHalfFull = False;
+            currentlyFull = False;
         time.sleep(0.3)
 
 def destroy():
