@@ -2,20 +2,8 @@
 import RPi.GPIO as GPIO
 import time
 
-colors = (0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF)
-colors_dict = {
-    "Red": 0xFF0000,
-    "Green": 0x00FF00,
-    "Blue": 0x0000FF,
-    "Yellow": 0xFFFF00,
-    "Magenta": 0xFF00FF,
-    "Cyan": 0x00FFFF,
-    "Off": 0x000000
-}
 TRIG = 11 #ultrasonic input GPIO 17
 ECHO = 12 #ultrasonic output GPIO 18
-R = 13 # LED red pin GPIO 27
-G = 15 # LED green pin GPIO 22
 VIBRATION_PIN = 18 # GPIO 24
 FULL_DISTANCE = 5
 HALF_DISTANCE = 10
@@ -37,21 +25,6 @@ def setup() -> None:
     GPIO.setup(TRIG2, GPIO.OUT)
     GPIO.setup(ECHO2, GPIO.IN)
 
-    # dual color LED setup
-    GPIO.setup(R, GPIO.OUT)
-    GPIO.setup(G, GPIO.OUT)
-
-    # set LED pins to LOW / off
-    GPIO.output(R, GPIO.LOW)
-    GPIO.output(G, GPIO.LOW)
-
-    p_R = GPIO.PWM(R, 2000) # set frequency to 2KHz
-    p_G = GPIO.PWM(G, 2000)
-
-    # Initial duty Cycle = 0 (leds off)
-    p_R.start(0)
-    p_G.start(0)
-
     # Set Vibration motor pin
     GPIO.setup(VIBRATION_PIN, GPIO.OUT)
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
@@ -68,21 +41,6 @@ def map(x, in_min, in_max, out_min, out_max):
     Converts an input value x from one range into another range
     """
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-
-def setColor(col: int) -> None:
-    """
-    Sets the led to a color based on a 24-bit int
-    """
-    # get individual rgb values from 24-bit color
-    R_val = col >> 16
-    G_val = (col >> 8) & 0x00FF
-
-    # map the rgb values (0-255) into rpi duty cycles (0-100%)
-    R_val = map(R_val, 0, 255, 0, 100)
-    G_val = map(G_val, 0, 255, 0, 100)
-
-    p_R.ChangeDutyCycle(R_val)
-    p_G.ChangeDutyCycle(G_val)
 
 def distance() -> float:
     """
@@ -136,13 +94,10 @@ def loop():
             print(dis, 'cm')
             print()
             if dis <= FULL_DISTANCE:
-                setColor(colors_dict["Red"])
                 vibrate_on()
             elif dis <= HALF_DISTANCE:
-                setColor(colors_dict["Yellow"])
                 vibrate_off()
             else:
-                setColor(colors_dict["Off"])
                 vibrate_off()
             time.sleep(0.3)
 
@@ -150,12 +105,6 @@ def destroy():
     """
     Deprograms the pins for safe exit
     """
-    # turn off leds
-    p_R.stop()
-    p_G.stop()
-    GPIO.output(R, GPIO.LOW)
-    GPIO.output(G, GPIO.LOW)
-
     # turn off vibration motor
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
