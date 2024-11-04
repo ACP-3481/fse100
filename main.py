@@ -147,3 +147,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt as exc:
         print(exc)
         destroy()
+    except Exception as exc:
+        print(exc)
+        destroy()
+
