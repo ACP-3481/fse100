@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import RPi.GPIO as GPIO
 import time
+from playsound import playsound
 
 TRIG = 11 #ultrasonic input GPIO 17
 ECHO = 12 #ultrasonic output GPIO 18
@@ -88,18 +89,41 @@ def loop():
     """
     Main program loop.
     """
+    currentlyOn = False
+    currentlyOff = False
+    currentlyFull = False
+    currentlyHalf = False
     while True:
         if proximity() <= 5: # only run when cup is within 5 cm
+            if not currentlyOn:
+                playsound("on.mp3")
+                currentlyOn = True
+                currentlyOff = False
             dis = distance()
             print(dis, 'cm')
             print()
             if dis <= FULL_DISTANCE:
                 vibrate_on()
+                if not currentlyFull:
+                    currentlyFull = True
+                    currentlyHalf = False
+                    playsound("full.mp3")
             elif dis <= HALF_DISTANCE:
                 vibrate_off()
+                if not currentlyHalf:
+                    currentlyHalf = True
+                    currentlyFull = False
+                    playsound("half.mp3")
             else:
+                currentlyHalf = False
+                currentlyFull = False
                 vibrate_off()
             time.sleep(0.3)
+        else:
+            if not currentlyOff:
+                playsound("off.mp3")
+                currentlyOff = True
+                currentlyOn = False
 
 def destroy():
     """
