@@ -128,6 +128,7 @@ def loop():
             if not currentlyOff:
                 print("Playing off.mp3")
                 playsound("off.mp3")
+                print("I;m here")
                 currentlyOff = True
                 currentlyOn = False
 
