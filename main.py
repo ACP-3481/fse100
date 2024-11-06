@@ -94,6 +94,7 @@ def loop():
     currentlyFull = False
     currentlyHalf = False
     while True:
+        print("here 2")
         currProximity = proximity()
         print(f"Proximity: {currProximity}")
         if currProximity <= 5: # only run when cup is within 5 cm
