@@ -73,7 +73,7 @@ def proximity() -> float:
 
     GPIO.output(TRIG2, 1)
     time.sleep(0.00001) # wait 10 microseconds to trigger the ultrasonic pulse
-    GPIO.output(TRIG, 0)
+    GPIO.output(TRIG2, 0)
 
     while GPIO.input(ECHO) == 0: # wait for ECHO to go high
         pass
