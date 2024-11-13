@@ -192,13 +192,6 @@ class HX711:
         # Return the mean of remaining samples.
         return sum(valueList) / len(valueList)
 
-def cleanAndExit():
-    print("Cleaning...")
-        
-    print("Bye!")
-    sys.exit()
-
-hx = HX711(5, 6)
     # A median-based read method, might help when getting random value spikes
     # for unknown or CPU-related reasons
     def read_median(self, times=3):
