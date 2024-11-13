@@ -2,6 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 from playsound import playsound
+import threading
 
 TRIG = 11 #ultrasonic input GPIO 17
 ECHO = 12 #ultrasonic output GPIO 18
