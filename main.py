@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 import time
 from playsound import playsound
 import threading
+from hx711 import HX711
 
 TRIG = 11 #ultrasonic input GPIO 17
 ECHO = 12 #ultrasonic output GPIO 18
@@ -12,12 +13,16 @@ HALF_DISTANCE = 10
 TRIG2 = 29 # ultrasonic (proximity) input GPIO 5
 ECHO2 = 31 # ultrasonic (proximity) output GPIO 6
 
+DOUT = 0 # FIXME set DOUT pin
+PD_SCK = 0 # FIXME set PD_SCK pin
+REFERENCE_UNIT = 1 # FIXME calculate reference unit
+GAIN = 1 # FIXME figure out gain
+
+
 def setup() -> None:
     """
     Setup for GPIO pins in BOARD mode
     """
-    global p_R
-    global p_G
     GPIO.setmode(GPIO.BOARD)
     # ultrasonic setup
     GPIO.setup(TRIG, GPIO.OUT)
@@ -30,6 +35,15 @@ def setup() -> None:
     # Set Vibration motor pin
     GPIO.setup(VIBRATION_PIN, GPIO.OUT)
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
+
+    # initialize weight sensor
+    global hx
+    hx = HX711(DOUT, PD_SCK)
+    hx.set_reading_format("MSB", "MSB") # FIXME figure out if it should be MSB or LSB
+
+    hx.set_reference_unit(REFERENCE_UNIT)
+    hx.reset()
+
 
 def vibrate_on():
     GPIO.output(VIBRATION_PIN, GPIO.HIGH)
@@ -104,9 +118,12 @@ def loop():
                 playsound("on.mp3")
                 currentlyOn = True
                 currentlyOff = False
+                # FIXME add hx.tare() logic here
             dis = distance()
             print(dis, 'cm')
             print()
+            weight = hx.get_weight(5)
+            # FIXME do something with the weight
             if dis <= FULL_DISTANCE:
                 vibrate_on()
                 if not currentlyFull:
