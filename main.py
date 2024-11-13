@@ -13,8 +13,9 @@ HALF_DISTANCE = 10
 TRIG2 = 29 # ultrasonic (proximity) input GPIO 5
 ECHO2 = 31 # ultrasonic (proximity) output GPIO 6
 
-DOUT = 0 # FIXME set DOUT pin
-PD_SCK = 0 # FIXME set PD_SCK pin
+# weight sensor pins
+DOUT = 33 # GPIO 13
+PD_SCK = 35 # GPIO 19
 REFERENCE_UNIT = 1 # FIXME calculate reference unit
 GAIN = 1 # FIXME figure out gain
 
@@ -118,7 +119,8 @@ def loop():
                 playsound("on.mp3")
                 currentlyOn = True
                 currentlyOff = False
-                # FIXME add hx.tare() logic here
+                time.sleep(1)
+                hx.tare()
             dis = distance()
             print(dis, 'cm')
             print()
