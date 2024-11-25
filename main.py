@@ -1,26 +1,24 @@
-#!/usr/bin/env python3
 import RPi.GPIO as GPIO
 import time
 from playsound import playsound
 
-TRIG = 11 #ultrasonic input GPIO 17
-ECHO = 12 #ultrasonic output GPIO 18
-VIBRATION_PIN = 18 # GPIO 24
+TRIG = 11  # ultrasonic input GPIO 17
+ECHO = 12  # ultrasonic output GPIO 18
+VIBRATION_PIN = 18  # GPIO 24
 FULL_DISTANCE = 5
 HALF_DISTANCE = 10
-TRIG2 = 29 # ultrasonic (proximity) input GPIO 5
-ECHO2 = 31 # ultrasonic (proximity) output GPIO 6
+TRIG2 = 29  # ultrasonic (proximity) input GPIO 5
+ECHO2 = 31  # ultrasonic (proximity) output GPIO 6
+
 
 def setup() -> None:
     """
     Setup for GPIO pins in BOARD mode
     """
-    global p_R
-    global p_G
     GPIO.setmode(GPIO.BOARD)
     # ultrasonic setup
     GPIO.setup(TRIG, GPIO.OUT)
-    GPIO.setup(ECHO, GPIO.IN) # read from ultrasonic
+    GPIO.setup(ECHO, GPIO.IN)  # read from ultrasonic
 
     # proximity setup
     GPIO.setup(TRIG2, GPIO.OUT)
@@ -30,60 +28,77 @@ def setup() -> None:
     GPIO.setup(VIBRATION_PIN, GPIO.OUT)
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
+
 def vibrate_on():
     GPIO.output(VIBRATION_PIN, GPIO.HIGH)
+
 
 def vibrate_off():
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
 
-def map(x, in_min, in_max, out_min, out_max):
+def map_value(x, in_min, in_max, out_min, out_max):
     """
     Converts an input value x from one range into another range
     """
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
 
 def distance() -> float:
     """
     Gets the distance from the ultrasonic sensor in cm
     """
     GPIO.output(TRIG, 0)
-    time.sleep(0.000002) # wait 2 microseconds to ensure the pin settles
+    time.sleep(0.000002)  # wait 2 microseconds to ensure the pin settles
 
     GPIO.output(TRIG, 1)
-    time.sleep(0.00001) # wait 10 microseconds to trigger the ultrasonic pulse
+    time.sleep(0.00001)  # wait 10 microseconds to trigger the ultrasonic pulse
     GPIO.output(TRIG, 0)
 
-    while GPIO.input(ECHO) == 0: # wait for ECHO to go high
-        pass
+    timeout = time.time() + 0.02  # 20 ms timeout
+    while GPIO.input(ECHO) == 0:  # wait for ECHO to go high
+        if time.time() > timeout:
+            print("Timeout waiting for ECHO to go high")
+            return -1
     time1 = time.time()
-    while GPIO.input(ECHO) == 1: # wait for ECHO to go low
-        pass
+    timeout = time.time() + 0.02  # another 20 ms timeout
+    while GPIO.input(ECHO) == 1:  # wait for ECHO to go low
+        if time.time() > timeout:
+            print("Timeout waiting for ECHO to go low")
+            return -1
     time2 = time.time()
 
     during = time2 - time1
-    return during * 340 / 2 * 100 # Speed of sound = 340 m/s, convert to cm
+    return during * 340 / 2 * 100  # Speed of sound = 340 m/s, convert to cm
+
 
 def proximity() -> float:
     """
     Gets the distance from the proximity sensor in cm
     """
     GPIO.output(TRIG2, 0)
-    time.sleep(0.000002) # wait 2 microseconds to ensure the pin settles
+    time.sleep(0.000002)  # wait 2 microseconds to ensure the pin settles
 
     GPIO.output(TRIG2, 1)
-    time.sleep(0.00001) # wait 10 microseconds to trigger the ultrasonic pulse
+    time.sleep(0.00001)  # wait 10 microseconds to trigger the ultrasonic pulse
     GPIO.output(TRIG2, 0)
 
-    while GPIO.input(ECHO2) == 0: # wait for ECHO to go high
-        pass
+    timeout = time.time() + 0.02  # 20 ms timeout
+    while GPIO.input(ECHO2) == 0:  # wait for ECHO2 to go high
+        if time.time() > timeout:
+            print("Timeout waiting for ECHO2 to go high")
+            return -1
     time1 = time.time()
-    while GPIO.input(ECHO2) == 1: # wait for ECHO to go low
-        pass
+    timeout = time.time() + 0.02  # another 20 ms timeout
+    while GPIO.input(ECHO2) == 1:  # wait for ECHO2 to go low
+        if time.time() > timeout:
+            print("Timeout waiting for ECHO2 to go low")
+            return -1
     time2 = time.time()
 
     during = time2 - time1
-    return during * 340 / 2 * 100 # Speed of sound = 340 m/s, convert to cm
+    return during * 340 / 2 * 100  # Speed of sound = 340 m/s, convert to cm
+
 
 def loop():
     """
@@ -96,15 +111,21 @@ def loop():
     while True:
         print("here 2")
         currProximity = proximity()
+        if currProximity == -1:
+            print("Error reading proximity sensor")
+            continue
         print(f"Proximity: {currProximity}")
-        if currProximity <= 5: # only run when cup is within 5 cm
+        if currProximity <= 5:  # only run when cup is within 5 cm
             if not currentlyOn:
                 print("Playing on.mp3")
                 playsound("on.mp3")
                 currentlyOn = True
                 currentlyOff = False
             dis = distance()
-            print(dis, 'cm')
+            if dis == -1:
+                print("Error reading distance sensor")
+                continue
+            print(f"{dis} cm")
             print()
             if dis <= FULL_DISTANCE:
                 vibrate_on()
@@ -129,9 +150,10 @@ def loop():
             if not currentlyOff:
                 print("Playing off.mp3")
                 playsound("off.mp3")
-                print("I;m here")
+                print("I'm here")
                 currentlyOff = True
                 currentlyOn = False
+
 
 def destroy():
     """
@@ -142,6 +164,7 @@ def destroy():
 
     GPIO.cleanup()
 
+
 if __name__ == "__main__":
     setup()
     try:
@@ -150,6 +173,7 @@ if __name__ == "__main__":
         print(exc)
         destroy()
     except Exception as exc:
-        print(exc)
+        import traceback
+        traceback.print_exc()
         destroy()
 
