@@ -7,9 +7,6 @@ ECHO = 12  # ultrasonic output GPIO 18
 VIBRATION_PIN = 18  # GPIO 24
 FULL_DISTANCE = 5
 HALF_DISTANCE = 10
-TRIG2 = 29  # ultrasonic (proximity) input GPIO 5
-ECHO2 = 31  # ultrasonic (proximity) output GPIO 6
-
 
 def setup() -> None:
     """
@@ -20,29 +17,21 @@ def setup() -> None:
     GPIO.setup(TRIG, GPIO.OUT)
     GPIO.setup(ECHO, GPIO.IN)  # read from ultrasonic
 
-    # proximity setup
-    GPIO.setup(TRIG2, GPIO.OUT)
-    GPIO.setup(ECHO2, GPIO.IN)
-
     # Set Vibration motor pin
     GPIO.setup(VIBRATION_PIN, GPIO.OUT)
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
-
 def vibrate_on():
     GPIO.output(VIBRATION_PIN, GPIO.HIGH)
 
-
 def vibrate_off():
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
-
 
 def map_value(x, in_min, in_max, out_min, out_max):
     """
     Converts an input value x from one range into another range
     """
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-
 
 def distance() -> float:
     """
@@ -71,89 +60,38 @@ def distance() -> float:
     during = time2 - time1
     return during * 340 / 2 * 100  # Speed of sound = 340 m/s, convert to cm
 
-
-def proximity() -> float:
-    """
-    Gets the distance from the proximity sensor in cm
-    """
-    GPIO.output(TRIG2, 0)
-    time.sleep(0.000002)  # wait 2 microseconds to ensure the pin settles
-
-    GPIO.output(TRIG2, 1)
-    time.sleep(0.00001)  # wait 10 microseconds to trigger the ultrasonic pulse
-    GPIO.output(TRIG2, 0)
-
-    timeout = time.time() + 0.02  # 20 ms timeout
-    while GPIO.input(ECHO2) == 0:  # wait for ECHO2 to go high
-        if time.time() > timeout:
-            print("Timeout waiting for ECHO2 to go high")
-            return -1
-    time1 = time.time()
-    timeout = time.time() + 0.02  # another 20 ms timeout
-    while GPIO.input(ECHO2) == 1:  # wait for ECHO2 to go low
-        if time.time() > timeout:
-            print("Timeout waiting for ECHO2 to go low")
-            return -1
-    time2 = time.time()
-
-    during = time2 - time1
-    return during * 340 / 2 * 100  # Speed of sound = 340 m/s, convert to cm
-
-
 def loop():
     """
     Main program loop.
     """
-    currentlyOn = False
-    currentlyOff = False
     currentlyFull = False
     currentlyHalf = False
     while True:
-        print("here 2")
-        currProximity = proximity()
-        if currProximity == -1:
-            print("Error reading proximity sensor")
+        dis = distance()
+        if dis == -1:
+            print("Error reading distance sensor")
             continue
-        print(f"Proximity: {currProximity}")
-        if currProximity <= 5:  # only run when cup is within 5 cm
-            if not currentlyOn:
-                print("Playing on.mp3")
-                playsound("on.mp3")
-                currentlyOn = True
-                currentlyOff = False
-            dis = distance()
-            if dis == -1:
-                print("Error reading distance sensor")
-                continue
-            print(f"{dis} cm")
-            print()
-            if dis <= FULL_DISTANCE:
-                vibrate_on()
-                if not currentlyFull:
-                    currentlyFull = True
-                    currentlyHalf = False
-                    print("Playing full.mp3")
-                    playsound("full.mp3")
-            elif dis <= HALF_DISTANCE:
-                vibrate_off()
-                if not currentlyHalf:
-                    currentlyHalf = True
-                    currentlyFull = False
-                    print("Playing half.mp3")
-                    playsound("half.mp3")
-            else:
+        print(f"{dis} cm")
+        print()
+        if dis <= FULL_DISTANCE:
+            vibrate_on()
+            if not currentlyFull:
+                currentlyFull = True
                 currentlyHalf = False
+                print("Playing full.mp3")
+                playsound("full.mp3")
+        elif dis <= HALF_DISTANCE:
+            vibrate_off()
+            if not currentlyHalf:
+                currentlyHalf = True
                 currentlyFull = False
-                vibrate_off()
-            time.sleep(0.3)
+                print("Playing half.mp3")
+                playsound("half.mp3")
         else:
-            if not currentlyOff:
-                print("Playing off.mp3")
-                playsound("off.mp3")
-                print("I'm here")
-                currentlyOff = True
-                currentlyOn = False
-
+            currentlyHalf = False
+            currentlyFull = False
+            vibrate_off()
+        time.sleep(0.3)
 
 def destroy():
     """
@@ -163,7 +101,6 @@ def destroy():
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
     GPIO.cleanup()
-
 
 if __name__ == "__main__":
     setup()
