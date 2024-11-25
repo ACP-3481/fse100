@@ -4,7 +4,7 @@ import RPi.GPIO as GPIO
 from hx711 import HX711
 def cleanAndExit():
     print("Cleaning...")
-        
+    GPIO.cleanup()    
     print("Bye!")
     sys.exit()
 
