@@ -7,6 +7,7 @@ VIBRATION_PIN = 18 # GPIO 24
 
 def setup():
     # Set Vibration motor pin
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup(VIBRATION_PIN, GPIO.OUT)
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
