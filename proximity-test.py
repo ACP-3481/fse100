@@ -28,6 +28,7 @@ def proximity() -> float:
 
 def setup():
     # proximity setup
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup(TRIG2, GPIO.OUT)
     GPIO.setup(ECHO2, GPIO.IN)
 
