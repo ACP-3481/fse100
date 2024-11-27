@@ -114,7 +114,7 @@ def loop():
         print("here 2")
         currProximity = proximity()
         print(f"Proximity: {currProximity}")
-        if currProximity <= 5: # only run when cup is within 5 cm
+        if currProximity <= 6.5: # only run when cup is within 5 cm
             if not currentlyOn:
                 print("Playing on.mp3")
                 playsound("on.mp3")
