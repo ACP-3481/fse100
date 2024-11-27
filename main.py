@@ -16,9 +16,10 @@ ECHO2 = 31 # ultrasonic (proximity) output GPIO 6
 # weight sensor pins
 DOUT = 33 # GPIO 13
 PD_SCK = 35 # GPIO 19
-REFERENCE_UNIT = 1 # FIXME calculate reference unit
+REFERENCE_UNIT = 678
 GAIN = 1 # FIXME figure out gain
-
+HALF_WEIGHT = 60
+FULL_WEIGHT = 110
 
 def setup() -> None:
     """
@@ -125,15 +126,15 @@ def loop():
             print(dis, 'cm')
             print()
             weight = hx.get_weight(5)
-            # FIXME do something with the weight
-            if dis <= FULL_DISTANCE:
+            # FIXME do something with the wei
+            if weight >= FULL_WEIGHT # and dis <= FULL_DISTANCE:
                 vibrate_on()
                 if not currentlyFull:
                     currentlyFull = True
                     currentlyHalf = False
                     print("Playing full.mp3")
                     playsound("full.mp3")
-            elif dis <= HALF_DISTANCE:
+            elif weight >= HALF_WEIGHT # and dis <= HALF_DISTANCE:
                 vibrate_off()
                 if not currentlyHalf:
                     currentlyHalf = True
