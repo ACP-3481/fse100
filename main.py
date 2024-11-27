@@ -126,16 +126,14 @@ def loop():
             print(dis, 'cm')
             print()
             weight = hx.get_weight(5)
-            if weight >= FULL_WEIGHT
-                # and dis <= FULL_DISTANCE:
+            if weight >= FULL_WEIGHT: # and dis <= FULL_DISTANCE:
                 vibrate_on()
                 if not currentlyFull:
                     currentlyFull = True
                     currentlyHalf = False
                     print("Playing full.mp3")
                     playsound("full.mp3")
-            elif weight >= HALF_WEIGHT
-                # and dis <= HALF_DISTANCE:
+            elif weight >= HALF_WEIGHT: # and dis <= HALF_DISTANCE:
                 vibrate_off()
                 if not currentlyHalf:
                     currentlyHalf = True
