@@ -117,7 +117,7 @@ def loop():
         if currProximity <= 6.5: # only run when cup is within 5 cm
             if not currentlyOn:
                 print("Playing on.mp3")
-                playsound("on.mp3")
+                playsound("assets/on.mp3")
                 currentlyOn = True
                 currentlyOff = False
                 time.sleep(1)
@@ -132,14 +132,14 @@ def loop():
                     currentlyFull = True
                     currentlyHalf = False
                     print("Playing full.mp3")
-                    playsound("full.mp3")
+                    playsound("assets/full.mp3")
             elif weight >= HALF_WEIGHT: # and dis <= HALF_DISTANCE:
                 vibrate_off()
                 if not currentlyHalf:
                     currentlyHalf = True
                     currentlyFull = False
                     print("Playing half.mp3")
-                    playsound("half.mp3")
+                    playsound("assets/half.mp3")
             else:
                 currentlyHalf = False
                 currentlyFull = False
@@ -148,7 +148,7 @@ def loop():
         else:
             if not currentlyOff:
                 print("Playing off.mp3")
-                playsound("off.mp3")
+                playsound("assets/off.mp3")
                 print("I;m here")
                 currentlyOff = True
                 currentlyOn = False
