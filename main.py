@@ -55,13 +55,6 @@ def vibrate_on():
 def vibrate_off():
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
 
-
-def map(x, in_min, in_max, out_min, out_max):
-    """
-    Converts an input value x from one range into another range
-    """
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-
 def distance() -> float:
     """
     Gets the distance from the ultrasonic sensor in cm
