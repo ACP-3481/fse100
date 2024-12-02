@@ -7,6 +7,7 @@ from hx711 import HX711
 TRIG = 11 #ultrasonic input GPIO 17
 ECHO = 12 #ultrasonic output GPIO 18
 VIBRATION_PIN = 18 # GPIO 24
+# distance thresholds (cm)
 FULL_DISTANCE = 24
 HALF_DISTANCE = 26
 TRIG2 = 29 # ultrasonic (proximity) input GPIO 5
@@ -16,7 +17,7 @@ ECHO2 = 31 # ultrasonic (proximity) output GPIO 6
 DOUT = 33 # GPIO 13
 PD_SCK = 35 # GPIO 19
 REFERENCE_UNIT = 678
-GAIN = 1 # FIXME figure out gain
+GAIN = 1
 HALF_WEIGHT = 60
 FULL_WEIGHT = 110
 
@@ -42,7 +43,7 @@ def setup() -> None:
     # initialize weight sensor
     global hx
     hx = HX711(DOUT, PD_SCK)
-    hx.set_reading_format("MSB", "MSB") # FIXME figure out if it should be MSB or LSB
+    hx.set_reading_format("MSB", "MSB")
 
     hx.set_reference_unit(REFERENCE_UNIT)
     hx.reset()
@@ -107,6 +108,7 @@ def loop():
     """
     Main program loop.
     """
+    # flags to prevent the speaker from looping
     currentlyOn = False
     currentlyOff = False
     currentlyFull = False
@@ -114,8 +116,10 @@ def loop():
     while True:
         currProximity = proximity()
         print(f"Proximity: {currProximity}")
-        if currProximity <= PROXIMITY_THRESHOLD: # only run when cup is within 5 cm
+        # start when the cup is within the proximity threshold
+        if currProximity <= PROXIMITY_THRESHOLD:
             if not currentlyOn:
+            # only run on state change to On
                 print("Playing on.mp3")
                 playsound("assets/on.mp3")
                 currentlyOn = True
@@ -126,9 +130,11 @@ def loop():
             print(dis, 'cm')
             print()
             weight = hx.get_weight(5)
+            # Monitor for weight and distance thresholds
             if weight >= FULL_WEIGHT and dis <= FULL_DISTANCE:
-                vibrate_on()
+                vibrate_on() # vibrates on full
                 if not currentlyFull:
+                # only run on state change to Full
                     currentlyFull = True
                     currentlyHalf = False
                     print("Playing full.mp3")
@@ -136,17 +142,20 @@ def loop():
             elif weight >= HALF_WEIGHT and dis <= HALF_DISTANCE:
                 vibrate_off()
                 if not currentlyHalf:
+                # only run on state change to Half
                     currentlyHalf = True
                     currentlyFull = False
                     print("Playing half.mp3")
                     playsound("assets/half.mp3")
             else:
+                # reset state if no thresholds are met
                 currentlyHalf = False
                 currentlyFull = False
                 vibrate_off()
             time.sleep(0.3)
         else:
             if not currentlyOff:
+            # only run on state change to Off
                 print("Playing off.mp3")
                 playsound("assets/off.mp3")
                 currentlyOff = True
@@ -154,7 +163,7 @@ def loop():
 
 def destroy():
     """
-    Deprograms the pins for safe exit
+    Deprograms pins for safe exit
     """
     # turn off vibration motor
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
