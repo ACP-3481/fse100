@@ -2,14 +2,13 @@
 import RPi.GPIO as GPIO
 import time
 from playsound import playsound
-import threading
 from hx711 import HX711
 
 TRIG = 11 #ultrasonic input GPIO 17
 ECHO = 12 #ultrasonic output GPIO 18
 VIBRATION_PIN = 18 # GPIO 24
-FULL_DISTANCE = 5
-HALF_DISTANCE = 10
+FULL_DISTANCE = 24
+HALF_DISTANCE = 26
 TRIG2 = 29 # ultrasonic (proximity) input GPIO 5
 ECHO2 = 31 # ultrasonic (proximity) output GPIO 6
 
@@ -20,6 +19,8 @@ REFERENCE_UNIT = 678
 GAIN = 1 # FIXME figure out gain
 HALF_WEIGHT = 60
 FULL_WEIGHT = 110
+
+PROXIMITY_THRESHOLD = 6.5 # cm
 
 def setup() -> None:
     """
@@ -114,7 +115,7 @@ def loop():
         print("here 2")
         currProximity = proximity()
         print(f"Proximity: {currProximity}")
-        if currProximity <= 6.5: # only run when cup is within 5 cm
+        if currProximity <= PROXIMITY_THRESHOLD: # only run when cup is within 5 cm
             if not currentlyOn:
                 print("Playing on.mp3")
                 playsound("assets/on.mp3")
@@ -126,14 +127,14 @@ def loop():
             print(dis, 'cm')
             print()
             weight = hx.get_weight(5)
-            if weight >= FULL_WEIGHT: # and dis <= FULL_DISTANCE:
+            if weight >= FULL_WEIGHT and dis <= FULL_DISTANCE:
                 vibrate_on()
                 if not currentlyFull:
                     currentlyFull = True
                     currentlyHalf = False
                     print("Playing full.mp3")
                     playsound("assets/full.mp3")
-            elif weight >= HALF_WEIGHT: # and dis <= HALF_DISTANCE:
+            elif weight >= HALF_WEIGHT and dis <= HALF_DISTANCE:
                 vibrate_off()
                 if not currentlyHalf:
                     currentlyHalf = True
