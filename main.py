@@ -1,12 +1,22 @@
 import RPi.GPIO as GPIO
 import time
 from playsound import playsound
+import threading
+from hx711 import HX711
 
 TRIG = 11  # ultrasonic input GPIO 17
 ECHO = 12  # ultrasonic output GPIO 18
 VIBRATION_PIN = 18  # GPIO 24
 FULL_DISTANCE = 5
 HALF_DISTANCE = 10
+
+# weight sensor pins
+DOUT = 33 # GPIO 13
+PD_SCK = 35 # GPIO 19
+REFERENCE_UNIT = 678
+GAIN = 1 # FIXME figure out gain
+HALF_WEIGHT = 60
+FULL_WEIGHT = 110
 
 def setup() -> None:
     """
@@ -20,6 +30,15 @@ def setup() -> None:
     # Set Vibration motor pin
     GPIO.setup(VIBRATION_PIN, GPIO.OUT)
     GPIO.output(VIBRATION_PIN, GPIO.LOW)
+
+    # initialize weight sensor
+    global hx
+    hx = HX711(DOUT, PD_SCK)
+    hx.set_reading_format("MSB", "MSB") # FIXME figure out if it should be MSB or LSB
+
+    hx.set_reference_unit(REFERENCE_UNIT)
+    hx.reset()
+
 
 def vibrate_on():
     GPIO.output(VIBRATION_PIN, GPIO.HIGH)
@@ -67,16 +86,36 @@ def loop():
     currentlyFull = False
     currentlyHalf = False
     while True:
-        dis = distance()
-        if dis == -1:
-            print("Error reading distance sensor")
-            continue
-        print(f"{dis} cm")
-        print()
-        if dis <= FULL_DISTANCE:
-            vibrate_on()
-            if not currentlyFull:
-                currentlyFull = True
+        print("here 2")
+        currProximity = proximity()
+        print(f"Proximity: {currProximity}")
+        if currProximity <= 6.5: # only run when cup is within 5 cm
+            if not currentlyOn:
+                print("Playing on.mp3")
+                playsound("on.mp3")
+                currentlyOn = True
+                currentlyOff = False
+                time.sleep(1)
+                hx.tare()
+            dis = distance()
+            print(dis, 'cm')
+            print()
+            weight = hx.get_weight(5)
+            if weight >= FULL_WEIGHT: # and dis <= FULL_DISTANCE:
+                vibrate_on()
+                if not currentlyFull:
+                    currentlyFull = True
+                    currentlyHalf = False
+                    print("Playing full.mp3")
+                    playsound("full.mp3")
+            elif weight >= HALF_WEIGHT: # and dis <= HALF_DISTANCE:
+                vibrate_off()
+                if not currentlyHalf:
+                    currentlyHalf = True
+                    currentlyFull = False
+                    print("Playing half.mp3")
+                    playsound("half.mp3")
+            else:
                 currentlyHalf = False
                 print("Playing full.mp3")
                 playsound("full.mp3")
