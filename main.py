@@ -112,7 +112,6 @@ def loop():
     currentlyFull = False
     currentlyHalf = False
     while True:
-        print("here 2")
         currProximity = proximity()
         print(f"Proximity: {currProximity}")
         if currProximity <= PROXIMITY_THRESHOLD: # only run when cup is within 5 cm
@@ -150,7 +149,6 @@ def loop():
             if not currentlyOff:
                 print("Playing off.mp3")
                 playsound("assets/off.mp3")
-                print("I;m here")
                 currentlyOff = True
                 currentlyOn = False
 
